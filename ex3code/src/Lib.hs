@@ -29,19 +29,30 @@ import Prelude hiding (foldr, maximum, minimum, any, all, length
 -- data Maybe a = Just a | Nothing
 
 listSum :: (Num a) => [a] -> a
-listSum = undefined
+listSum [] = 0
+listSum (x:xs) = x + listSum xs
 
 listProduct :: (Num a) => [a] -> a
-listProduct = undefined
+listProduct [] = 1
+listProduct (x:xs) = x * listProduct xs
 
 listConcat :: [[a]] -> [a]
-listConcat = undefined
+listConcat [] = []
+listConcat (x:xs) = x ++ listConcat xs
 
 listMaximum :: (Ord a) => [a] -> Maybe a
-listMaximum = undefined
+listMaximum [] = Nothing
+listMaximum (x:xs) = do
+    case listMaximum xs of
+        Just a -> Just $ max x a
+        Nothing -> Just x
 
 listMinimum :: (Ord a) => [a] -> Maybe a
-listMinimum = undefined
+listMinimum [] = Nothing
+listMinimum (x:xs) = do
+    case listMinimum xs of
+        Just a -> Just $ min x a
+        Nothing -> Just x
 
 -- TASK 3 Folds
 
