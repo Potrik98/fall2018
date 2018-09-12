@@ -64,29 +64,35 @@ class Foldable t where
   foldr :: (a -> b -> b) -> b -> t a -> b
 
 instance Foldable [] where
-  foldr = undefined
+  foldr f b [] = b
+  foldr f b (x:xs) = f x $ foldr f b xs
 
 --
 -- USE FOLDR TO DEFINE THESE FUNCTIONS
 --
 sum :: (Num a, Foldable t) => t a -> a
-sum = undefined
+sum = foldr (+) 0
 
 concat :: Foldable t => t [a] -> [a]
-concat = undefined
+concat = foldr (++) []
 
 length :: Foldable t => t a -> Int
-length = undefined
+length = foldr (\a b -> b + 1) 0
 
 elem :: (Eq a, Foldable t) => a -> t a -> Bool
-elem = undefined
+elem e l = foldr (\a b -> b || a == e) False l 
 
 safeMaximum :: (Foldable t, Ord a) => t a -> Maybe a
-safeMaximum = undefined
+safeMaximum = foldr (\a b -> do
+    case b of
+        Just c -> Just $ max a c
+        Nothing -> Just a) Nothing
 
 safeMinimum :: (Foldable t, Ord a) => t a -> Maybe a
-safeMinimum = undefined
-
+safeMinimum = foldr (\a b -> do
+    case b of
+        Just c -> Just $ min a c
+        Nothing -> Just a) Nothing
 -- The functions "any" and "all" check if any or all elements of a
 -- Foldable satisfy the given predicate.
 --
