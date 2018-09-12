@@ -80,7 +80,7 @@ length :: Foldable t => t a -> Int
 length = foldr (\a b -> b + 1) 0
 
 elem :: (Eq a, Foldable t) => a -> t a -> Bool
-elem e l = foldr (\a b -> b || a == e) False l 
+elem e = foldr (\a b -> b || a == e) False
 
 safeMaximum :: (Foldable t, Ord a) => t a -> Maybe a
 safeMaximum = foldr (\a b -> do
@@ -99,10 +99,10 @@ safeMinimum = foldr (\a b -> do
 -- USE FOLDR
 --
 any :: Foldable t => (a -> Bool) -> t a -> Bool
-any p = undefined
+any p = foldr (\a b -> b || p a) False
 
 all :: Foldable t => (a -> Bool) -> t a -> Bool
-all p = undefined
+all p = foldr (\a b -> b && p a) True
 
 -- TASK 4
 -- Num Complex
@@ -114,13 +114,13 @@ instance Show Complex where
         | i >= 0 = show r ++ "+" ++ show i ++ "i" 
         | otherwise = show r ++ "-" ++ show (abs i) ++ "i" 
 
-instance Num Complex where 
-    (+) = undefined
-    (*) = undefined
-    abs = undefined 
-    signum = undefined
-    fromInteger = undefined 
-    negate = undefined 
+instance Num Complex where
+    (+) (Complex a b) (Complex c d) = Complex (a+b) (c+d)
+    (*) (Complex a b) (Complex c d) = Complex (a*c - b*d) (a*d + b*c)
+    abs (Complex a b) = Complex (sqrt (a*a + b*b)) 0
+    signum (Complex a b) = Complex (a / z) (b / z) where z = sqrt (a*a + b*b)
+    fromInteger a = Complex (fromIntegral a) 0
+    negate (Complex a b) = Complex (-a) (-b)
 
 -- TASK 5
 -- Making your own type classes
