@@ -145,6 +145,3 @@ instance Pos Campus where
     pos Dragvoll    = (63.409, 10.471)
 
 --class (Pos a) => Move a where
-
-data Employee = Employee { name :: String, employeenr :: Int}
-data Student = Student { studentnr :: Int}
