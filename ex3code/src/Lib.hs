@@ -115,7 +115,7 @@ instance Show Complex where
         | otherwise = show r ++ "-" ++ show (abs i) ++ "i" 
 
 instance Num Complex where
-    (+) (Complex a b) (Complex c d) = Complex (a+b) (c+d)
+    (+) (Complex a b) (Complex c d) = Complex (a+c) (b+d)
     (*) (Complex a b) (Complex c d) = Complex (a*c - b*d) (a*d + b*c)
     abs (Complex a b) = Complex (sqrt (a*a + b*b)) 0
     signum (Complex a b) = Complex (a / z) (b / z) where z = sqrt (a*a + b*b)
@@ -145,3 +145,6 @@ instance Pos Campus where
     pos Dragvoll    = (63.409, 10.471)
 
 --class (Pos a) => Move a where
+
+data Employee = Employee { name :: String, employeenr :: Int}
+data Student = Student { studentnr :: Int}

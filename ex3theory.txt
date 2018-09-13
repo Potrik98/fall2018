@@ -1,0 +1,18 @@
+- A Tree contains at least one value (Leaf node)
+so we do not have to return a maybe.
+
+- Because they are applicable to any Foldable t,
+including both Foldable [] and Foldable Tree
+
+- (<=) returns a Bool but because complex numbers
+are of higher dimensionality than real numbers,
+it does not make sense to say one number is 'bigger'.
+
+- The answer returned is 1-3i which is correct.
+This is because z - w is implemented as z + (neg w)
+
+- No, because T can not be a synonym.
+
+- Multiple declaration error.
+The type is a function, e.g studentnr :: Student -> Int,
+and thus cannot have mutiple declarations.
