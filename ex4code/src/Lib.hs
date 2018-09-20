@@ -14,6 +14,7 @@ module Lib
 
 import Prelude hiding (lex, dropWhile, takeWhile, break)
 import Data.Char (isDigit)
+import Debug.Trace
 
 takeWhile, dropWhile :: (a -> Bool) -> [a] -> [a]
 
@@ -84,11 +85,22 @@ rpn (TokOp op:ts) stack = rpn ts (doOperator op stack)
 interpret :: [Token] -> [Token]
 interpret ts = fst $ rpn ts []
                 
-opLeq :: Token -> Token -> Bool
-opLeq = undefined
+opLess :: Op -> Op -> Bool
+opLess Div Mult = False
+opLess Mult Div = False
+opLess _ Mult = True
+opLess _ Div = True
+opLess _ _ = False
 
 shunt :: [Token] -> [Token]
-shunt = undefined
+shunt t = shuntInternal t [] []
 
 shuntInternal :: [Token] -> [Token] -> [Token] -> [Token]
-shuntInternal = undefined
+shuntInternal [] us _ = us
+shuntInternal ((TokInt a):xs) us os = shuntInternal xs ((TokInt a):us) os
+shuntInternal (TokOp op:xs) us [] = shuntInternal xs us ((TokOp op):[])
+shuntInternal (TokOp op:xs) us (TokOp t:os) =
+        if opLess op t then
+                shuntInternal (trace "less" ((TokOp op):xs)) ((TokOp t):us) os
+        else
+                shuntInternal (trace ("xs: " ++ show xs) xs) us ((TokOp op):(TokOp t):os)
