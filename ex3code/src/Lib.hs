@@ -13,6 +13,11 @@ module Lib
     , any
     , all
     , foldr
+    , free
+    , q
+    , Car(..)
+    , Pos(..)
+    , Move(..)
     , Complex(..)
     ) where
 
@@ -144,4 +149,25 @@ instance Pos Campus where
     pos Moholt      = (63.413, 10.434)
     pos Dragvoll    = (63.409, 10.471)
 
---class (Pos a) => Move a where
+class (Pos a) => Move a where
+    move :: a -> Position -> a
+    belongsTo :: a -> Position
+
+data Car = Car {
+    carId :: Int,
+    carPosition :: Position,
+    carBelongsTo :: Position
+} deriving (Show)
+
+instance Eq Car where
+    (==) a b = carId a == carId b && carPosition a == carPosition b
+
+instance Pos Car where
+    pos = carPosition
+
+instance Move Car where
+    move a b = a {carPosition = b}
+    belongsTo = carBelongsTo
+
+free :: Move a => a -> Bool
+free a = (pos a) == (belongsTo a)
