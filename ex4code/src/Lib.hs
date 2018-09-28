@@ -102,14 +102,14 @@ opLeq a b = opPriority a <= opPriority b
 
 shunt :: [Token] -> [Token]
 shunt [TokErr] = [TokErr]
-shunt t = shuntInternal t [] []
+shunt t = trace "test2" (shuntInternal t [] [])
 
 shuntInternal :: [Token] -> [Token] -> [Token] -> [Token]
-shuntInternal [] us _ = us
+shuntInternal [] us op = us ++ (reverse op)
 shuntInternal ((TokInt a):xs) us os = shuntInternal xs ((TokInt a):us) os
-shuntInternal (TokOp op:xs) us [] = shuntInternal xs us ((TokOp op):[])
+shuntInternal (TokOp op:xs) us [] = shuntInternal xs us (((TokOp op)):[])
 shuntInternal (TokOp op:xs) us (TokOp t:os) =
-        if opLeq op t then
-                shuntInternal (trace "less" ((TokOp op):xs)) ((TokOp t):us) os
-        else
+        if opLeq t op then
                 shuntInternal (trace ("xs: " ++ show xs) xs) us ((TokOp op):(TokOp t):os)
+        else
+                shuntInternal (trace "less" ((TokOp op):xs)) ((TokOp t):us) os
