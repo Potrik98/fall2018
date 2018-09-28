@@ -46,6 +46,8 @@ data Op = Plus
         | Minus
         | Div
         | Mult
+        | Dupl
+        | Inv
         deriving (Show, Eq)
 
 lex :: String -> [String]
@@ -61,12 +63,16 @@ doOperator Plus (a:b:xs) = (a + b):xs
 doOperator Minus (a:b:xs) = (b - a):xs
 doOperator Div (a:b:xs) = (div b a):xs
 doOperator Mult (a:b:xs) = (a * b):xs
+doOperator Dupl (a:xs) = a:a:xs
+doOperator Inv (a:xs) = (-a):xs
 
 token :: String -> Token
 token "+" = TokOp Plus
 token "-" = TokOp Minus
 token "*" = TokOp Mult
 token "/" = TokOp Div
+token "#" = TokOp Dupl
+token "--" = TokOp Inv
 token s = case t of
         Just v -> TokInt v
         Nothing -> TokErr
@@ -84,15 +90,18 @@ rpn (TokOp op:ts) stack = rpn ts (doOperator op stack)
 
 interpret :: [Token] -> [Token]
 interpret ts = fst $ rpn ts []
-                
-opLess :: Op -> Op -> Bool
-opLess Div Mult = False
-opLess Mult Div = False
-opLess _ Mult = True
-opLess _ Div = True
-opLess _ _ = False
+
+opPriority :: Op -> Int
+opPriority Mult = 2
+opPriority Div = 2
+opPriority Plus = 1
+opPriority Minus = 1
+
+opLeq :: Op -> Op -> Bool
+opLeq a b = opPriority a <= opPriority b
 
 shunt :: [Token] -> [Token]
+shunt [TokErr] = [TokErr]
 shunt t = shuntInternal t [] []
 
 shuntInternal :: [Token] -> [Token] -> [Token] -> [Token]
@@ -100,7 +109,7 @@ shuntInternal [] us _ = us
 shuntInternal ((TokInt a):xs) us os = shuntInternal xs ((TokInt a):us) os
 shuntInternal (TokOp op:xs) us [] = shuntInternal xs us ((TokOp op):[])
 shuntInternal (TokOp op:xs) us (TokOp t:os) =
-        if opLess op t then
+        if opLeq op t then
                 shuntInternal (trace "less" ((TokOp op):xs)) ((TokOp t):us) os
         else
                 shuntInternal (trace ("xs: " ++ show xs) xs) us ((TokOp op):(TokOp t):os)
