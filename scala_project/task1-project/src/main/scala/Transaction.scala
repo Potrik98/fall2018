@@ -41,7 +41,7 @@ class Transaction(val transactionsQueue: TransactionQueue,
 
         def doTransaction() = {
             try {
-                // println("Attempting transaction of " + amount)
+                // println("Attempting transaction of " + amount + " (Attempt no " + attempts + ")")
                 from withdraw amount
                 to deposit amount
                 status = TransactionStatus.SUCCESS
@@ -61,6 +61,9 @@ class Transaction(val transactionsQueue: TransactionQueue,
                     doTransaction
                 }
             }
+            if (status == TransactionStatus.PENDING) {
+                Thread.sleep(100)
+            }
         }
 
         if (attempts == allowedAttemps) {
@@ -68,7 +71,8 @@ class Transaction(val transactionsQueue: TransactionQueue,
             processedTransactions.push(this)
         }
 
-        // println("Transaction competed with status " + status +
+        // println("Transaction competed after " + attempts +
+        //         " attemtps, with status " + status +
         //         ". Processed: " + processedTransactions.size)
     }
 }
