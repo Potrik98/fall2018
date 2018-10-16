@@ -33,7 +33,7 @@ class Transaction(val transactionsQueue: TransactionQueue,
                   val to: Account,
                   val amount: Double,
                   val allowedAttemps: Int) extends Runnable {
-
+  
     var status: TransactionStatus.Value = TransactionStatus.PENDING
 
     override def run: Unit = {
