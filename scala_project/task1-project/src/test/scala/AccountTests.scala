@@ -93,22 +93,16 @@ class AccountTransferTests extends FunSuite {
 
         acc1 transferTo(acc2, 50)
 
-        println("hei")
         while (bank.getProcessedTransactionsAsList.size != 1) {
             println(bank.getProcessedTransactionsAsList.size)
             Thread.sleep(100)
         }
-        println("heiei")
 
         assert(bank.getProcessedTransactionsAsList.last.status == TransactionStatus.SUCCESS)
         assert((acc1.getBalanceAmount == 50) && (acc2.getBalanceAmount == 250))
-        println("hade")
-
-        bank.stop
     }
 
     test("Test 09: Transfer of negative amount between accounts should fail") {
-        println("TEST 9")
         val bank = new Bank()
 
         val acc1 = bank.addAccount(500)
@@ -122,11 +116,6 @@ class AccountTransferTests extends FunSuite {
 
         assert(bank.getProcessedTransactionsAsList.last.status == TransactionStatus.FAILED)
         assert((acc1.getBalanceAmount == 500) && (acc2.getBalanceAmount == 1000))
-
-        println("asdtfg")
-        bank.stop
-        println("aølkjshgd")
-
     }
 
 
@@ -143,92 +132,82 @@ class AccountTransferTests extends FunSuite {
 
         assert(bank.getProcessedTransactionsAsList.last.status == TransactionStatus.FAILED)
         assert((acc1.getBalanceAmount == 100) && (acc2.getBalanceAmount == 1000))
-
-        bank.stop
     }
 
-/*
-    test("Test 11: Correct balance amounts after several transfers") {
-        val bank = new Bank()
+    // test("Test 11: Correct balance amounts after several transfers") {
+    //     val bank = new Bank()
 
-        val acc1 = new Account(bank, 3000)
-        val acc2 = new Account(bank, 5000)
-        val first = Main.thread {
-            for (i <- 0 until 100) {
-                bank addTransactionToQueue(acc1, acc2, 30)
-            }
-        }
-        val second = Main.thread {
-            for (i <- 0 until 100) {
-                bank addTransactionToQueue(acc2, acc1, 23)
-            }
-        }
-        first.join()
-        second.join()
+    //     val acc1 = new Account(bank, 3000)
+    //     val acc2 = new Account(bank, 5000)
+    //     val first = Main.thread {
+    //         for (i <- 0 until 100) {
+    //             bank addTransactionToQueue(acc1, acc2, 30)
+    //         }
+    //     }
+    //     val second = Main.thread {
+    //         for (i <- 0 until 100) {
+    //             bank addTransactionToQueue(acc2, acc1, 23)
+    //         }
+    //     }
+    //     first.join()
+    //     second.join()
 
-        while (bank.getProcessedTransactionsAsList.size != 200) {
-            Thread.sleep(100)
-        }
+    //     while (bank.getProcessedTransactionsAsList.size != 200) {
+    //         Thread.sleep(100)
+    //     }
 
-        assert((acc1.getBalanceAmount == 2300) && (acc2.getBalanceAmount == 5700))
+    //     assert((acc1.getBalanceAmount == 2300) && (acc2.getBalanceAmount == 5700))
+    // }
 
-        bank.stop
-    }
+    // test("Test 12: Failed transactions should retry and potentially succeed with multiple allowed attempts") {
+    //     var failed = 0
+    //     for (x <- 1 to 100) {
+    //         val bank = new Bank(allowedAttempts = 3)
 
-    test("Test 12: Failed transactions should retry and potentially succeed with multiple allowed attempts") {
-        var failed = 0
-        for (x <- 1 to 100) {
-            val bank = new Bank(allowedAttempts = 3)
+    //         val acc1 = new Account(bank, 100)
+    //         val acc2 = new Account(bank, 100)
+    //         val acc3 = new Account(bank, 100)
 
-            val acc1 = new Account(bank, 100)
-            val acc2 = new Account(bank, 100)
-            val acc3 = new Account(bank, 100)
+    //         for (i <- 1 to 6) {
+    //             acc1 transferTo(acc2, 50)
+    //         }
+    //         for (j <- 1 to 2) {
+    //             acc3 transferTo(acc1, 50)
+    //         }
 
-            for (i <- 1 to 6) {
-                acc1 transferTo(acc2, 50)
-            }
-            for (j <- 1 to 2) {
-                acc3 transferTo(acc1, 50)
-            }
+    //         while (bank.getProcessedTransactionsAsList.size != 8) {
+    //             Thread.sleep(100)
+    //         }
 
-            while (bank.getProcessedTransactionsAsList.size != 8) {
-                Thread.sleep(100)
-            }
+    //         if (!(acc1.getBalanceAmount == 0
+    //                 && acc2.getBalanceAmount == 300
+    //                 && acc3.getBalanceAmount == 0)) failed += 1
+    //     }
+    //     assert(failed <= 5)
+    // }
 
-            if (!(acc1.getBalanceAmount == 0
-                    && acc2.getBalanceAmount == 300
-                    && acc3.getBalanceAmount == 0)) failed += 1
+    // test("Test 13: Some transactions should be stopped with only one allowed attempt") {
+    //     var failed = 0
+    //     for (x <- 1 to 100) {
+    //         val bank = new Bank(allowedAttempts = 1)
 
-            bank.stop
-        }
-        assert(failed <= 5)
-    }
+    //         val acc1 = new Account(bank, 100)
+    //         val acc2 = new Account(bank, 100)
+    //         val acc3 = new Account(bank, 100)
 
-    test("Test 13: Some transactions should be stopped with only one allowed attempt") {
-        var failed = 0
-        for (x <- 1 to 100) {
-            val bank = new Bank(allowedAttempts = 1)
+    //         for (i <- 1 to 6) {
+    //             acc1 transferTo(acc2, 50)
+    //         }
+    //         for (j <- 1 to 2) {
+    //             acc3 transferTo(acc1, 50)
+    //         }
 
-            val acc1 = new Account(bank, 100)
-            val acc2 = new Account(bank, 100)
-            val acc3 = new Account(bank, 100)
+    //         while (bank.getProcessedTransactionsAsList.size != 8) {
+    //             Thread.sleep(100)
+    //         }
 
-            for (i <- 1 to 6) {
-                acc1 transferTo(acc2, 50)
-            }
-            for (j <- 1 to 2) {
-                acc3 transferTo(acc1, 50)
-            }
-
-            while (bank.getProcessedTransactionsAsList.size != 8) {
-                Thread.sleep(100)
-            }
-
-            if (!(acc2.getBalanceAmount != 300 && acc3.getBalanceAmount == 0)) failed += 1
-
-            bank.stop
-        }
-        assert(failed <= 5)
-    }
-*/
+    //         if (!(acc2.getBalanceAmount != 300 && acc3.getBalanceAmount == 0)) failed += 1
+    //     }
+    //     assert(failed <= 5)
+    // }
 }

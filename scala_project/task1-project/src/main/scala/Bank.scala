@@ -1,5 +1,4 @@
 import scala.concurrent.forkjoin.ForkJoinPool
-import util.control.Breaks._
 
 class Bank(val allowedAttempts: Integer = 3) {
 
@@ -24,35 +23,19 @@ class Bank(val allowedAttempts: Integer = 3) {
     }
 
     private def processTransactions: Unit = {
-        /*if (running) return
+        if (running) return
         running = true
         thread = new Thread {
             override def run {
-                while (running) {
-                    breakable {
-                        if (transactionsQueue.isEmpty) {
-                            Thread.sleep(50)
-                            break
-                        }
-                        val t = transactionsQueue.pop
-                        val t2 = new Thread(t)
-                        t2.start()
-                    }
+                while (!transactionsQueue.isEmpty) {
+                    val t = transactionsQueue.pop
+                    val thr = new Thread(t)
+                    thr.start
                 }
+                running = false
             }
         }
-        thread.start*/
-        while (!transactionsQueue.isEmpty) {
-            val t = transactionsQueue.pop
-            val t2 = new Thread(t)
-            t2.start()
-            t2.join(1000)
-        }
-    }
-
-    def stop: Unit = {/*
-        running = false
-        thread.join*/
+        thread.start
     }
 
     def addAccount(initialBalance: Double): Account = {
