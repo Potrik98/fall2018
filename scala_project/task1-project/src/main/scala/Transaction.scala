@@ -10,21 +10,21 @@ class TransactionQueue {
     val queue = new Queue[Transaction]()
 
     // Remove and return the first element from the queue
-    def pop: Transaction = queue.dequeue
+    def pop: Transaction = this.synchronized { queue.dequeue }
 
     // Return whether the queue is empty
-    def isEmpty: Boolean = queue.isEmpty
+    def isEmpty: Boolean = this.synchronized { queue.isEmpty }
 
     // Add new element to the back of the queue
-    def push(t: Transaction): Unit = queue.enqueue(t)
+    def push(t: Transaction): Unit = this.synchronized { queue.enqueue(t) }
 
     // Return the first element from the queue without removing it
-    def peek: Transaction = queue.front
+    def peek: Transaction = this.synchronized { queue.front }
 
     // Return an iterator to allow you to iterate over the queue
-    def iterator: Iterator[Transaction] = queue.iterator
+    def iterator: Iterator[Transaction] = this.synchronized { queue.iterator }
 
-    def size: Int = queue.size
+    def size: Int = this.synchronized { queue.size }
 }
 
 class Transaction(val transactionsQueue: TransactionQueue,
@@ -41,7 +41,7 @@ class Transaction(val transactionsQueue: TransactionQueue,
 
         def doTransaction() = {
             try {
-                println("Attempting transaction of " + amount)
+                // println("Attempting transaction of " + amount)
                 from withdraw amount
                 to deposit amount
                 status = TransactionStatus.SUCCESS
@@ -68,8 +68,7 @@ class Transaction(val transactionsQueue: TransactionQueue,
             processedTransactions.push(this)
         }
 
-        println("Transaction competed with status " + status +
-                ". Processed: " + processedTransactions.size +
-                ", left: " + transactionsQueue.size)
+        // println("Transaction competed with status " + status +
+        //         ". Processed: " + processedTransactions.size)
     }
 }
