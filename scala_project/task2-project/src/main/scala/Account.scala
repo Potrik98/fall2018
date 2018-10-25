@@ -35,7 +35,7 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
         // Should return whether all Transaction-objects in transactions are completed
 
         for ((k,v) <- transactions) {
-            if (!v.isCompleted) {
+            if (v.status == TransactionStatus.PENDING) {
                 return false
             }
         }
@@ -44,16 +44,19 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
     }
 
     def withdraw(amount: Double): Unit = {
-        if (amount < balance.amount) {
-            balance.amount -= amount // Like in part 2
-        }
+        if (amount < 0) throw new IllegalAmountException 
+        if (amount < balance.amount) throw new NoSufficientFundsException
+        balance.amount -= amount
     }
-    def deposit(amount: Double): Unit = balance.amount += amount // Like in part 2
+    def deposit(amount: Double): Unit = {
+        if (amount < 0) throw new IllegalAmountException 
+        balance.amount += amount // Like in part 2
+    }
     def getBalanceAmount: Double = return balance.amount // Like in part 2
 
     def sendTransactionToBank(t: Transaction): Unit = {
         // Should send a message containing t to the bank of this account
-        
+       BankManager.findBank(bankId) ! t 
     }
 
     def transferTo(accountNumber: String, amount: Double): Transaction = {
@@ -88,17 +91,27 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
 
 		case TransactionRequestReceipt(to, transactionId, transaction) => {
 			// Process receipt
-			???
+			transaction.receiptReceived = true
 		}
 
-		case BalanceRequest => balance.amount // Should return current balance
+		case BalanceRequest => getBalanceAmount // Should return current balance
 
 		case t: Transaction => {
 			// Handle incoming transaction
-			balance.amount += t.amount
+            try {
+               deposit(t.amount)
+               t.status = TransactionStatus.SUCCESS
+            }
+            catch {
+                case e: Exception => (t.status = TransactionStatus.FAILED)
+            }
+            finally {
+                sender ! TransactionRequestReceipt(t.to, t.id, t)
+                System.out.println("Finished")
+            }
 		}
 
-		case msg => ???
+		case msg => 
     }
 
 
