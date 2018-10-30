@@ -65,6 +65,7 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
 
         if (reserveTransaction(t)) {
             try {
+                println("withdrawing " + amount)
                 withdraw(amount)
                 sendTransactionToBank(t)
 
@@ -92,6 +93,10 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
 		case TransactionRequestReceipt(to, transactionId, transaction) => {
 			// Process receipt
 			transaction.receiptReceived = true
+            println("recieved transaciton reciept")
+            println(to)
+            println(transactionId)
+            println(transaction)
 		}
 
 		case BalanceRequest => getBalanceAmount // Should return current balance

@@ -13,7 +13,7 @@ case class IdentifyActor()
 
 class Bank(val bankId: String) extends Actor {
 
-    val accountCounter = new AtomicInteger(1000)
+    val accountCounter = new AtomicInteger(1001)
 
     def createAccount(initialBalance: Double): ActorRef = {
         // Should create a new Account Actor and return its actor reference. Accounts should be assigned with unique ids (increment with 1).
@@ -32,20 +32,26 @@ class Bank(val bankId: String) extends Actor {
     }
 
     override def receive = {
-        case CreateAccountRequest(initialBalance) => createAccount(initialBalance) // Create a new account
-        case GetAccountRequest(id) => findAccount(id) // Return account
+        case CreateAccountRequest(initialBalance) => sender ! createAccount(initialBalance) // Create a new account
+        case GetAccountRequest(id) => sender ! findAccount(id) // Return account
         case IdentifyActor => sender ! this
-        case t: Transaction => processTransaction(t)
+        case t: Transaction => sender ! processTransaction(t)
 
         case t: TransactionRequestReceipt => {
         // Forward receipt
             if (t.toAccountNumber.length <= 4 || t.toAccountNumber.substring(0, 4) == bankId) {
-                findAccount(t.toAccountNumber) ! t
+                val someAccount = findAccount(t.toAccountNumber)
+                if (!someAccount.isEmpty) {
+                    someAccount.get ! t
+                }
             }
             else {
-                findOtherBank(t.toAccountNumber.substring(0, 4)) ! t
+                val someBank = findOtherBank(t.toAccountNumber.substring(0, 4))
+                if (!someBank.isEmpty) {
+                    someBank.get ! t
+                }
             }
-            //sender ! TransactionRequestReceipt(t.to, t.id, t)
+//            sender ! TransactionRequestReceipt(t.to, t.id, t)
         }
 
         case msg => ???
@@ -66,7 +72,5 @@ class Bank(val bankId: String) extends Actor {
         else {
             findOtherBank(toBankId).get ! t
         }
-
-
     }
 }
