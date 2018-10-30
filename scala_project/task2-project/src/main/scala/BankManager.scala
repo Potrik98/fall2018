@@ -26,7 +26,7 @@ object BankManager {
     }
 
     def findAccount(bankId: String, accountId: String): ActorRef = {
-        val name = s"account$bankId$accountId"
+        val name = s"account$accountId"
         accounts(name)
     }
 

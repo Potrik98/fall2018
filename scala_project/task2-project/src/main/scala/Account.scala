@@ -45,7 +45,7 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
 
     def withdraw(amount: Double): Unit = {
         if (amount < 0) throw new IllegalAmountException 
-        if (amount < balance.amount) throw new NoSufficientFundsException
+        if (amount > balance.amount) throw new NoSufficientFundsException
         balance.amount -= amount
     }
     def deposit(amount: Double): Unit = {
@@ -56,21 +56,28 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
 
     def sendTransactionToBank(t: Transaction): Unit = {
         // Should send a message containing t to the bank of this account
-       BankManager.findBank(bankId) ! t 
+        println("Sending transaction to bank (" + bankId + ")")
+        BankManager.findBank(bankId) ! t
     }
 
     def transferTo(accountNumber: String, amount: Double): Transaction = {
+        val toAccount = if (accountNumber.length <= 4) bankId + accountNumber else accountNumber
 
-        val t = new Transaction(from = getFullAddress, to = accountNumber, amount = amount)
+        val t = new Transaction(from = getFullAddress, to = toAccount, amount = amount)
 
         if (reserveTransaction(t)) {
             try {
+                println("current balance: " + getBalanceAmount)
+                println("withdrawing " + amount)
                 withdraw(amount)
+                println("new balance: " + getBalanceAmount)
                 sendTransactionToBank(t)
 
             } catch {
-                case _: NoSufficientFundsException | _: IllegalAmountException =>
+                case _: NoSufficientFundsException | _: IllegalAmountException => {
                     t.status = TransactionStatus.FAILED
+                    println("withdrawal failed")
+                }
             }
         }
 
@@ -92,12 +99,18 @@ class Account(val accountId: String, val bankId: String, val initialBalance: Dou
 		case TransactionRequestReceipt(to, transactionId, transaction) => {
 			// Process receipt
 			transaction.receiptReceived = true
+            println("recieved transaciton reciept")
+            println("id: " + transactionId)
+            println("status: " + transaction.status)
 		}
 
 		case BalanceRequest => getBalanceAmount // Should return current balance
 
 		case t: Transaction => {
 			// Handle incoming transaction
+            println("Recieved incoming transaction:")
+            println("amount: " + t.amount)
+            println("from: " + t.from)
             try {
                deposit(t.amount)
                t.status = TransactionStatus.SUCCESS
